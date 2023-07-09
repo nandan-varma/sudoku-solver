@@ -1,95 +1,115 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client'
+import { useState } from 'react';
 
-export default function Home() {
+const SudokuPage = () => {
+  const [grid, setGrid] = useState(Array(9).fill(0).map(() => Array(9).fill('')));
+  const [solution, setSolution] = useState(Array(9).fill(Array(9).fill('')));
+
+  const handleInputChange = (e, row, col) => {
+    const updatedGrid = [...grid];
+    updatedGrid[row][col] = e.target.value;
+    setGrid(updatedGrid);
+  };
+
+  const isValid = (num, row, col) => {
+    for (let i = 0; i < 9; i++) {
+      if (grid[row][i] === num) {
+        return false;
+      }
+    }
+
+    for (let i = 0; i < 9; i++) {
+      if (grid[i][col] === num) {
+        return false;
+      }
+    }
+
+    const startRow = Math.floor(row / 3) * 3;
+    const startCol = Math.floor(col / 3) * 3;
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        if (grid[startRow + i][startCol + j] === num) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+
+  const solveSudoku = () => {
+    const solve = () => {
+      for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+          if (grid[row][col] === '') {
+            for (let num = 1; num <= 9; num++) {
+              if (isValid(num.toString(), row, col)) {
+                grid[row][col] = num.toString();
+                if (solve()) {
+                  return true;
+                }
+                grid[row][col] = '';
+              }
+            }
+            return false;
+          }
+        }
+      }
+      return true;
+    };
+
+    const clonedGrid = JSON.parse(JSON.stringify(grid));
+    if (solve()) {
+      setSolution(clonedGrid);
+    } else {
+      setSolution(Array(9).fill(Array(9).fill('')));
+    }
+  };
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
+    <div>
+      <h1>Sudoku Solver</h1>
+      <div>
+        {grid.map((row, rowIndex) => (
+          <div key={rowIndex} style={{ display: 'flex' }}>
+            {row.map((cell, colIndex) => (
+              <input
+                key={colIndex}
+                type="number"
+                min="1"
+                max="9"
+                value={cell}
+                onChange={(e) => handleInputChange(e, rowIndex, colIndex)}
+                style={{ width: '30px', height: '30px', textAlign: 'center', margin: '2px' }}
+              />
+            ))}
+          </div>
+        ))}
       </div>
+      <button style={{margin : '20px'}} onClick={solveSudoku}>Solve</button>
+      {/* <h2>Solution:</h2>
+      <div>
+        {solution.map((row, rowIndex) => (
+          <div key={rowIndex} style={{ display: 'flex' }}>
+            {row.map((cell, colIndex) => (
+              <div
+                key={colIndex}
+                style={{
+                  width: '30px',
+                  height: '30px',
+                  textAlign: 'center',
+                  margin: '2px',
+                  fontWeight: 'bold',
+                }}
+              >
+                {cell}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div> */}
+    </div>
+  );
+};
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
-}
+export default SudokuPage;
