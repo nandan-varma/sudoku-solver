@@ -1,31 +1,33 @@
 'use client'
 import { useState, useEffect } from 'react';
 
-const PADDLE_WIDTH = 100;
-const PADDLE_HEIGHT = 20;
-const BALL_RADIUS = 10;
-const BLOCK_WIDTH = 50;
-const BLOCK_HEIGHT = 20;
+const PADDLE_WIDTH = 20;
+const PADDLE_HEIGHT = 2;
+const BALL_RADIUS = 2;
+const BLOCK_WIDTH = 10;
+const BLOCK_HEIGHT = 4;
 const BLOCKS_PER_ROW = 10;
 const BLOCK_ROWS = 5;
 
 export default function Home() {
-  const [paddleX, setPaddleX] = useState(250);
-  const [ballX, setBallX] = useState(300);
-  const [ballY, setBallY] = useState(300);
-  const [ballDX, setBallDX] = useState(2);
-  const [ballDY, setBallDY] = useState(-2);
+  const [paddleX, setPaddleX] = useState(40);
+  const [ballX, setBallX] = useState(50);
+  const [ballY, setBallY] = useState(75);
+  const [ballDX, setBallDX] = useState(0.2);
+  const [ballDY, setBallDY] = useState(-0.2);
   const [blocks, setBlocks] = useState(
     new Array(BLOCK_ROWS * BLOCKS_PER_ROW).fill(true)
   );
   const [gameOver, setGameOver] = useState(false);
+  const [leftInterval, setLeftInterval] = useState(null);
+  const [rightInterval, setRightInterval] = useState(null);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'ArrowLeft') {
-        setPaddleX((x) => Math.max(0, x - 20));
+        setPaddleX((x) => Math.max(0, x - 2));
       } else if (event.key === 'ArrowRight') {
-        setPaddleX((x) => Math.min(500 - PADDLE_WIDTH, x + 20));
+        setPaddleX((x) => Math.min(100 - PADDLE_WIDTH, x + 2));
       }
     };
     document.addEventListener('keydown', handleKeyDown);
@@ -41,7 +43,7 @@ export default function Home() {
 
       // Check for collision with paddle
       if (
-        newBallY > 500 - PADDLE_HEIGHT - BALL_RADIUS &&
+        newBallY > 100 - PADDLE_HEIGHT - BALL_RADIUS &&
         newBallX > paddleX &&
         newBallX < paddleX + PADDLE_WIDTH
       ) {
@@ -76,7 +78,7 @@ export default function Home() {
       }
 
       // Check for collision with borders
-      if (newBallX < BALL_RADIUS || newBallX > 500 - BALL_RADIUS) {
+      if (newBallX < BALL_RADIUS || newBallX > 100 - BALL_RADIUS) {
         setBallDX(-ballDX);
         newBallX = ballX + ballDX;
       }
@@ -86,7 +88,7 @@ export default function Home() {
       }
 
       // Check for game over
-      if (newBallY > 500) {
+      if (newBallY > 100) {
         setGameOver(true);
         clearInterval(interval);
       }
@@ -98,8 +100,8 @@ export default function Home() {
   }, [ballDX, ballDY, ballX, ballY, blocks, gameOver, paddleX]);
 
   return (
-    <div style={{width : '500px', borderColor : 'black' , borderWidth: '2px' , borderStyle : 'dotted'}}>
-      <svg width="500" height="500">
+    <div>
+      <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
         {/* Draw blocks */}
         {blocks.map((block, index) => {
           if (!block) return null;
@@ -124,7 +126,7 @@ export default function Home() {
         {/* Draw paddle */}
         <rect
           x={paddleX}
-          y={500 - PADDLE_HEIGHT}
+          y={100 - PADDLE_HEIGHT}
           width={PADDLE_WIDTH}
           height={PADDLE_HEIGHT}
           fill="black"
@@ -135,21 +137,66 @@ export default function Home() {
 
         {/* Draw game over text */}
         {gameOver && (
-          <text x="250" y="250" textAnchor="middle" fontSize="30">
+          <text x="50" y="50" textAnchor="middle" fontSize="10">
             Game Over
           </text>
         )}
       </svg>
 
       {/* Draw left and right buttons */}
-      <div>
-
-      <button style={{padding : '40px', margin: '20px', marginLeft : '100px'}} onClick={() => setPaddleX((x) => Math.max(0, x - 20))}>
-        Left
-      </button>
-      <button style={{padding : '40px', margin: '20px'}} onClick={() => setPaddleX((x) => Math.min(500 - PADDLE_WIDTH, x + 20))}>
-        Right
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <button
+          style={{ width: '100px', height: '100px' }}
+          onMouseDown={() =>
+            setLeftInterval(
+              setInterval(() => setPaddleX((x) => Math.max(0, x - 2)), 50)
+            )
+          }
+          onMouseUp={() => {
+            clearInterval(leftInterval);
+            setLeftInterval(null);
+          }}
+          onTouchStart={() =>
+            setLeftInterval(
+              setInterval(() => setPaddleX((x) => Math.max(0, x - 2)), 50)
+            )
+          }
+          onTouchEnd={() => {
+            clearInterval(leftInterval);
+            setLeftInterval(null);
+          }}
+        >
+          Left
+        </button>
+        <button
+          style={{ width: '100px', height: '100px' }}
+          onMouseDown={() =>
+            setRightInterval(
+              setInterval(
+                () => setPaddleX((x) => Math.min(100 - PADDLE_WIDTH, x + 2)),
+                50
+              )
+            )
+          }
+          onMouseUp={() => {
+            clearInterval(rightInterval);
+            setRightInterval(null);
+          }}
+          onTouchStart={() =>
+            setRightInterval(
+              setInterval(
+                () => setPaddleX((x) => Math.min(100 - PADDLE_WIDTH, x + 2)),
+                50
+              )
+            )
+          }
+          onTouchEnd={() => {
+            clearInterval(rightInterval);
+            setRightInterval(null);
+          }}
+        >
+          Right
+        </button>
       </div>
     </div>
   );
