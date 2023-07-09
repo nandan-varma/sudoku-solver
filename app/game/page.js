@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons'
 const PADDLE_WIDTH = 20;
 const PADDLE_HEIGHT = 2;
 const BALL_RADIUS = 2;
@@ -166,7 +167,7 @@ export default function Home() {
             setLeftInterval(null);
           }}
         >
-          Left
+          <FontAwesomeIcon icon={faArrowLeft}></FontAwesomeIcon>
         </button>
         <button
           style={{ width: '100px', height: '100px' }}
@@ -195,7 +196,7 @@ export default function Home() {
             setRightInterval(null);
           }}
         >
-          Right
+          <FontAwesomeIcon icon={faArrowRight}></FontAwesomeIcon>
         </button>
       </div>
     </div>
